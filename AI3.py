@@ -12,7 +12,7 @@ sablonlar = {}
 boyut = None
 print(f"Sistemde tespit edilen dosyalar: {dosya_listesi}")
 for dosya in dosya_listesi:
-    print(f"\n{dosya}")
+#    print(f"\n{dosya}")
     toplam_matris = None
     with open(dosya, 'r') as f:
         for satir in f:
@@ -38,22 +38,22 @@ for dosya in dosya_listesi:
     plt.title(f"Şablon Isı Haritası: {dosya} ({boyut}x{boyut})")
     plt.imshow(hafiza_resmi, cmap='hot')
     plt.colorbar(label='Piksel Ağırlık Puanı')
-    plt.show()
-
-    print(f"[{dosya} SKOR ANALİZİ]")
-    with open(dosya, 'r') as f:
-        satir_no = 1
-        for satir in f:
-            elemanlar = satir.split()
-            if not elemanlar: continue
-            try:
-                sinav_matrisi = np.array([int(x) for x in elemanlar])
-                if len(sinav_matrisi) == eleman_sayisi:
-                    skor = np.sum(sinav_matrisi * temiz_toplam_matris)
-                    print(f"Örnek {satir_no} Skoru: {skor}")
-                    satir_no += 1
-            except ValueError:
-                continue
+#    plt.show()
+    
+#    print(f"[{dosya} SKOR ANALİZİ]")
+#    with open(dosya, 'r') as f:
+#        satir_no = 1
+#        for satir in f:
+#            elemanlar = satir.split()
+#            if not elemanlar: continue
+#            try:
+#                sinav_matrisi = np.array([int(x) for x in elemanlar])
+#                if len(sinav_matrisi) == eleman_sayisi:
+#                    skor = np.sum(sinav_matrisi * temiz_toplam_matris)
+#                    print(f"Örnek {satir_no} Skoru: {skor}")
+#                    satir_no += 1
+#            except ValueError:
+#                continue
 if not sablonlar:
     print("Geçerli hiçbir şablon oluşturulamadı. Program sonlandırılıyor.")
     sys.exit()
@@ -97,8 +97,26 @@ while calisiyor:
                 calisiyor = False
 pygame.quit()
 test_matrisi = cizim_alani.flatten()
-print(f"\n[NİHAİ ANALİZ SONUÇLARI]")
+en_yuksek_skor = -float('inf')
+tahmin_edilen_dosya = ""
 #sözlükte tuttuğumuz her dosya ismi ve onun şablonu için kıyaslama yapıyoruz
 for dosya_ismi, sablon_matrisi in sablonlar.items():
     yeni_skor = np.sum(test_matrisi * sablon_matrisi)
     print(f"Çizdilen matrisin {dosya_ismi} şablonuna göre benzerlik skoru: {yeni_skor}")
+    if yeni_skor > en_yuksek_skor:
+        en_yuksek_skor = yeni_skor
+        tahmin_edilen_dosya = dosya_ismi
+print(f"\nSİSTEM TAHMİNİ:{tahmin_edilen_dosya}")
+cevap = input("\nBu çizimi veri setine eklemek (öğretmek) ister misin? (E/H/Q): ").strip().lower()
+if cevap == 'e':
+    hangi = input("\nHangi veri setine eklemek istersiniz(A,B,C,..): ").strip().upper()
+    dosya_yolu = f"data/{hangi}.txt"
+elif cevap == 'q':
+    dosya_yolu = f"data/{tahmin_edilen_dosya}.txt"
+else:
+    print("Çizim kaydedilmedi.")
+    sys.exit()
+matris_metni = " ".join(map(str, test_matrisi))
+with open(dosya_yolu, "a") as f:
+    f.write(matris_metni + "\n")
+print(f"Yeni çizim '{dosya_yolu}' başarıyla eklendi.")
